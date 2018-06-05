@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="execution_text_min_size">30dp</dimen>
+    <dimen name="execution_text_max_size">130dp</dimen>
+</resources>

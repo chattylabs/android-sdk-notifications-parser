@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Demo: Notification Listener</string>
+    <string name="working_as_intended">Service is running.  Disable it in Security Settings.</string>
+    <string name="waiting_for_content">Service is running.  Waiting for notifications to arrive.</string>
+    <string name="nothing_to_see">Service is disabled.  You must enabled it to see notifications.</string>
+    <string name="launch_to_disable">Press to disable service</string>
+    <string name="launch_to_enable">Press to enable service</string>
+</resources>
