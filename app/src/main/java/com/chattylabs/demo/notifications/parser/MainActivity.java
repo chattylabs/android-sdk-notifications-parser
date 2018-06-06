@@ -61,7 +61,7 @@ public class MainActivity extends DaggerAppCompatActivity {
 
                 case NotificationParserComponent.ACTION_LOG:
                     String message = extras.getString(NotificationParserComponent.EXTRA_REPORT_MESSAGE);
-                    mExecutionText.setText(mExecutionText.getText().toString() + "\n" + message);
+                    mExecutionText.setText(String.format("%s\n%s", mExecutionText.getText().toString(), message));
                     break;
 
                 case NotificationParserComponent.ACTION_ERROR:
@@ -80,22 +80,22 @@ public class MainActivity extends DaggerAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // If not using Dagger injection you can still get the component from the static method
         //notificationParserComponent = NotificationParserModule.provideNotificationParserComponent();
 
-        mMessageAdapter = new MessageAdapter(this, listener);
-        mMessageAdapter.setData(new ArrayList<>());
+        // Makes sure the NotificationListener component is still enabled
+        notificationParserComponent.enableComponent(this);
 
+        // Launches Notification Access device settings
         mLaunchButton = findViewById(R.id.launch_settings);
-        mLaunchButton.setOnClickListener(v -> {
-            notificationParserComponent.launchSettings(this);
-        });
+        mLaunchButton.setOnClickListener(v -> notificationParserComponent.launchSettings(this));
+
+        // Retrieves and shows the current list of active notifications
         mLoadButton = findViewById(R.id.load_actives);
         mLoadButton.setOnClickListener(v -> {
-            // Retrieve Active Notifications
             if (notificationParserComponent.isEnabled(this)) {
                 progress.setVisibility(View.VISIBLE);
                 mMessageAdapter.setData(new ArrayList<>());
-                notificationParserComponent.enableComponent(this);
                 notificationParserComponent.retrieveActiveNotifications(this);
             }
         });
@@ -103,7 +103,7 @@ public class MainActivity extends DaggerAppCompatActivity {
         int minSize = getResources().getDimensionPixelSize(R.dimen.execution_text_min_size);
         int maxSize = getResources().getDimensionPixelSize(R.dimen.execution_text_max_size);
 
-        recycler = findViewById(R.id.list);
+        // Shows the executions logs
         mExecutionText = findViewById(R.id.execution);
         mExecutionText.setHeight(minSize);
         mExecutionText.setOnClickListener(v -> {
@@ -112,9 +112,12 @@ public class MainActivity extends DaggerAppCompatActivity {
         });
         progress = findViewById(R.id.progressBar);
         progress.setVisibility(View.GONE);
-
         mExecutionText.setMovementMethod(new ScrollingMovementMethod());
 
+        // Initialize the RecyclerView and its Adapter
+        recycler = findViewById(R.id.list);
+        mMessageAdapter = new MessageAdapter(this, listener);
+        mMessageAdapter.setData(new ArrayList<>());
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         mMessageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -128,6 +131,7 @@ public class MainActivity extends DaggerAppCompatActivity {
         recycler.setLayoutManager(linearLayoutManager);
         recycler.setAdapter(mMessageAdapter);
 
+        // HokeyApp Events
         UpdateManager.register(this);
         //FeedbackManager.setActivityForScreenshot(this);
     }
@@ -208,11 +212,12 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private void updateList(NotificationItem item) {
+        progress.setVisibility(View.GONE);
         if (item != null) {
             mMessageAdapter.update(item);
+            mExecutionText.setText(String.format("%s%nUpdating with item %s",
+                    mExecutionText.getText().toString(), item.getPackageName()));
         }
-        progress.setVisibility(View.GONE);
-        mExecutionText.setText(mExecutionText.getText().toString() + "\nUpdating with item " + item.getPackageName());
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -226,12 +231,14 @@ public class MainActivity extends DaggerAppCompatActivity {
         if (notificationParserComponent.isEnabled(this)) {
             mLoadButton.setVisibility(View.VISIBLE);
             mLaunchButton.setText(R.string.launch_to_disable);
-            mExecutionText.setText(mExecutionText.getText().toString() + "\n" + getString(R.string.waiting_for_content));
+            mExecutionText.setText(String.format("%s%n%s",
+                    mExecutionText.getText().toString(), getString(R.string.waiting_for_content)));
         }
         else {
             mLoadButton.setVisibility(View.GONE);
             mLaunchButton.setText(R.string.launch_to_enable);
-            mExecutionText.setText(mExecutionText.getText().toString() + "\n" + getString(R.string.nothing_to_see));
+            mExecutionText.setText(String.format("%s%n%s",
+                    mExecutionText.getText().toString(), getString(R.string.nothing_to_see)));
         }
     }
 
@@ -282,8 +289,9 @@ public class MainActivity extends DaggerAppCompatActivity {
 
             if (item.getType() == NotificationItem.MESSAGE) {
                 NotificationMessage message = (NotificationMessage) item;
-                holder.ticketText.setText("Type: MESSAGE (Already developed, No need to check!)\n"
-                                          + message.getSender() + ": " + message.getText());
+                holder.ticketText.setText(String.format(
+                        "Type: MESSAGE (Already developed, No need to check!)%n%s: %s",
+                        message.getSender(), message.getText()));
             }
             else if (item.getType() == NotificationItem.DATA) {
                 NotificationData data = (NotificationData) item;

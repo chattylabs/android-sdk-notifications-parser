@@ -1,1 +1,1 @@
-include ':app', ':sdk-notifications-parser'
+include ':app'

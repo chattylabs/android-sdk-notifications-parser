@@ -6,13 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    tools:context="com.chattylabs.demo.notifications.MainActivity">
+    tools:context="com.chattylabs.demo.notifications.parser.MainActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:background="#eeeeee"
         app:layout_constraintBottom_toTopOf="@+id/execution"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,13 +36,15 @@
         android:id="@+id/execution"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="App loaded"
-        android:maxLines="3"
-        android:gravity="bottom"
-        android:scrollbars="vertical"
-        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp"
         android:background="@android:color/background_dark"
+        android:gravity="bottom"
+        android:maxLines="3"
+        android:padding="8dp"
+        android:scrollbars="vertical"
+        android:text="App loaded"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/load_actives"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/list" />
@@ -52,27 +53,24 @@
         android:id="@+id/load_actives"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginStart="24dp"
         android:text="Load current Active Notifications"
+        app:layout_constraintBottom_toTopOf="@+id/launch_settings"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/execution" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/launch_settings"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="24dp"
         android:layout_marginStart="24dp"
         android:text="@string/launch_to_disable"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/load_actives" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

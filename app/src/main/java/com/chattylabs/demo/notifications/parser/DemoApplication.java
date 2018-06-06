@@ -1,7 +1,5 @@
 package com.chattylabs.demo.notifications.parser;
 
-
-import com.chattylabs.demo.notifications.parser.MainActivity;
 import com.chattylabs.sdk.android.notifications.NotificationParserModule;
 
 import dagger.android.AndroidInjector;
@@ -34,11 +32,5 @@ public class DemoApplication extends DaggerApplication {
     @Override
     protected AndroidInjector<DemoApplication> applicationInjector() {
         return DaggerDemoApplication_Component.builder().create(this);
-    }
-
-    @Override
-    public void onCreate() {
-        //NotificationParserModule.initialize();
-        super.onCreate();
     }
 }
