@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-public class CommonIntentService extends IntentService {
+public class NotificationListenerIntentService extends IntentService {
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      */
-    public CommonIntentService() {
-        super("CommonIntentService");
+    public NotificationListenerIntentService() {
+        super("NotificationListenerIntentService");
     }
 
     @Override
