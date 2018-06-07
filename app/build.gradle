@@ -9,7 +9,10 @@ android {
         applicationId "com.chattylabs.demo.notifications.parser"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders = [HOCKEYAPP_APP_ID: "658862d7f4d34d89b96ae8356aafdb05"]
+        manifestPlaceholders = [
+                HOCKEYAPP_APP_ID: "658862d7f4d34d89b96ae8356aafdb05",
+                CHATTYLABS_APP_ID: "e1c12f0f-4300-4358-874b-bcf74dbadeb9"
+        ]
     }
     signingConfigs {
         debug {
