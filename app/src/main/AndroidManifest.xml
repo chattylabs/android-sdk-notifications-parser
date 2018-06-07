@@ -18,8 +18,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="com.chattylabs.demo.notifications.parser.CommonIntentService">
-            <intent-filter android:priority="999">
+        <service android:name="com.chattylabs.demo.notifications.parser.NotificationListenerIntentService"
+            android:exported="false">
+            <intent-filter>
                 <action android:name="com.chattylabs.sdk.android.notifications.action.LOG"/>
                 <action android:name="com.chattylabs.sdk.android.notifications.action.ERROR"/>
                 <action android:name="com.chattylabs.sdk.android.notifications.action.POST"/>
