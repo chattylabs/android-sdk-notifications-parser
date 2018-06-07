@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${HOCKEYAPP_APP_ID}" />
-        <meta-data android:name="com.chattylabs.sdk.APP_ID" android:value="e1c12f0f-4300-4358-874b-bcf74dbadeb9" />
+        <meta-data android:name="com.chattylabs.sdk.APP_ID" android:value="${CHATTYLABS_APP_ID}" />
         <activity android:name="com.chattylabs.demo.notifications.parser.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
