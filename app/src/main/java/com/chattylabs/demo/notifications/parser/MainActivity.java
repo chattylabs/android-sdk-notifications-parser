@@ -81,7 +81,7 @@ public class MainActivity extends DaggerAppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // If not using Dagger injection you can still get the component from the static method
-        //notificationParserComponent = NotificationParserModule.provideNotificationParserComponent();
+        //notificationParserComponent = NotificationParserModule.provideNotificationParserComponent(new ILoggerImpl());
 
         // Makes sure the NotificationListener component is still enabled
         notificationParserComponent.enableComponent(this);

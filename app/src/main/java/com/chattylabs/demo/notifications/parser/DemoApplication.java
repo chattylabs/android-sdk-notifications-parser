@@ -1,5 +1,7 @@
 package com.chattylabs.demo.notifications.parser;
 
+import com.chattylabs.sdk.android.common.internal.ILogger;
+import com.chattylabs.sdk.android.common.internal.ILoggerImpl;
 import com.chattylabs.sdk.android.notifications.NotificationParserModule;
 
 import dagger.android.AndroidInjector;
@@ -24,6 +26,10 @@ public class DemoApplication extends DaggerApplication {
 
     @dagger.Module
     static abstract class DemoModule {
+
+        @dagger.Binds
+        @dagger.Reusable
+        abstract ILogger provideLogger(ILoggerImpl logger);
 
         @ContributesAndroidInjector
         abstract MainActivity mainActivity();
