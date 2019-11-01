@@ -1,1 +1,4 @@
 include ':app'
+
+include ":parser"
+project(":parser").projectDir = file("../private-android-sdk-notifications-parser/sdk-notifications-parser")

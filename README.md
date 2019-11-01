@@ -1,9 +1,9 @@
 # Notifications Parser Component
 
 ![Build Status](https://www.bitrise.io/app/0f5311bda229a817/status.svg?token=6TVvj6K_Q13Yyy5m1-gcHg&branch=master)
-[![Latest version](https://api.bintray.com/packages/chattylabs/maven/notifications-parser/images/download.svg?label=Latest%20version)](https://bintray.com/chattylabs/maven/notifications-parser/_latestVersion)
+[![Latest version](https://api.bintray.com/packages/chattylabs/maven/chattylabs.notifications-parser/images/download.svg?label=Latest%20version)](https://bintray.com/chattylabs/maven/chattylabs.notifications-parser/_latestVersion)
 
-Android SDK that allows you to retrieve the current active notifications and let you listen for incoming new ones.
+Android SDK that allows you to retrieve the current active chattylabs.notifications and let you listen for incoming new ones.
 
 <p align="center"><img src="assets/demo-sample.jpg" alt="demo-sample"/></p>
 
@@ -11,7 +11,7 @@ Android SDK that allows you to retrieve the current active notifications and let
 
 The **Notifications Parser Component SDK** contains built-in model algorithms that parse and extract the principal information from several instant messages apps and other installed apps. 
 
-It aims to deliver a reliable solution easy to integrate in a project, that measures and takes care of aspects like the order of the incoming notifications, 
+It aims to deliver a reliable solution easy to integrate in a project, that measures and takes care of aspects like the order of the incoming chattylabs.notifications,
 avoiding duplicated items, handling any required permission, reducing battery consumption processes, and providing a simplified API interface among others.
 
 The current built-in models are:
@@ -48,7 +48,7 @@ android {
 }
  
 dependencies {
-    implementation 'com.chattylabs.sdk.android:notifications-parser:x.y.z'
+    implementation 'com.chattylabs.sdk.android:chattylabs.notifications-parser:x.y.z'
 }
 ```
 
@@ -59,7 +59,7 @@ Add the following line inside the `<application />` tag of your **AndroidManifes
 ```
 
 ## Usage
-In order to get the notifications objects on your project, you have to create an 
+In order to get the chattylabs.notifications objects on your project, you have to create an
 [IntentService](https://developer.android.com/reference/android/app/IntentService) class
 where you can extract the items from the intent extras bundle.
 
@@ -75,12 +75,12 @@ public class NotificationListenerIntentService extends IntentService {
         // Avoid empty intents
         if (intent == null || intent.getAction() == null || intent.getExtras() == null) return;
         
-        // Initializes and provides a NotificationParserComponent instance
-        NotificationParserComponent NotificationParserComponent = 
-            NotificationParserModule.provideNotificationParserComponent();
+        // Initializes and provides a NotificationParser instance
+        NotificationParser NotificationParser =
+            NotificationParserModule.provideNotificationParser();
         
         // Extracts the current notification item from the intent extras bundle
-        NotificationItem item = notificationParserComponent.extract(intent);
+        NotificationItem item = NotificationParser.extract(intent);
         
         // ...
     }
@@ -96,8 +96,8 @@ inside your **AndroidManifest.xml** and to add the various [actions]() you want 
     android:exported="false">
     
     <intent-filter>
-        <action android:name="com.chattylabs.sdk.android.notifications.action.POST"/>
-        <action android:name="com.chattylabs.sdk.android.notifications.action.REMOVE"/>
+        <action android:name="com.chattylabs.sdk.android.chattylabs.notifications.action.POST"/>
+        <action android:name="com.chattylabs.sdk.android.chattylabs.notifications.action.REMOVE"/>
         
         ...
         
@@ -107,12 +107,12 @@ inside your **AndroidManifest.xml** and to add the various [actions]() you want 
 ```
 
 #### Usage with dependency injection
-If you make use of [Dagger 2](https://google.github.io/dagger/) in your project, you may provide the `NotificationParserComponent` instance with the `@Inject` annotation.
+If you make use of [Dagger 2](https://google.github.io/dagger/) in your project, you may provide the `NotificationParser` instance with the `@Inject` annotation.
 
 ```java
 public class NotificationListenerIntentService extends DaggerIntentService {
     
-    @Inject NotificationParserComponent notificationParserComponent;
+    @Inject NotificationParser NotificationParser;
     
     // ...
 }
@@ -120,7 +120,7 @@ public class NotificationListenerIntentService extends DaggerIntentService {
 
 You will need to add `NotificationParserModule.class` as a module element into your Dagger Component graph.
 Take a look on how 
-[DemoApplication](https://github.com/chattylabs/android-sdk-notifications-parser/blob/54782dfe9adcc864ba93f1d7bdc7ecb80f2a1d93/app/src/main/java/com/chattylabs/demo/notifications/parser/DemoApplication.java#L15) is handling this.
+[DemoApplication](https://github.com/chattylabs/android-sdk-chattylabs.notifications-parser/blob/54782dfe9adcc864ba93f1d7bdc7ecb80f2a1d93/app/src/main/java/com/chattylabs/demo/chattylabs.notifications/parser/DemoApplication.java#L15) is handling this.
 
 ## Demo
 After you have cloned this demo project, run the following command on a terminal console. 

@@ -1,15 +1,10 @@
-package com.chattylabs.demo.notifications.parser;
+package chattylabs.notifications.demo;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.transition.TransitionManager;
@@ -17,13 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.chattylabs.sdk.android.notifications.NotificationData;
-import com.chattylabs.sdk.android.notifications.NotificationItem;
-import com.chattylabs.sdk.android.notifications.NotificationMessage;
-import com.chattylabs.sdk.android.notifications.NotificationParserComponent;
+import com.chattylabs.android.commons.internal.ILoggerImpl;
 
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.UpdateManager;
@@ -31,11 +24,21 @@ import net.hockeyapp.android.UpdateManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.text.HtmlCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import chattylabs.notifications.NotificationData;
+import chattylabs.notifications.NotificationItem;
+import chattylabs.notifications.NotificationMessage;
+import chattylabs.notifications.NotificationParser;
+import chattylabs.notifications.NotificationParserProvider;
+import chattylabs.notifications.NotificationService;
 
-import dagger.android.support.DaggerAppCompatActivity;
-
-public class MainActivity extends DaggerAppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     private Button mLoadButton;
     private Button mLaunchButton;
@@ -44,7 +47,7 @@ public class MainActivity extends DaggerAppCompatActivity {
     private RecyclerView recycler;
     private ProgressBar progress;
 
-    @Inject NotificationParserComponent notificationParserComponent;
+    NotificationParser parserComponent;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -53,18 +56,17 @@ public class MainActivity extends DaggerAppCompatActivity {
             String action = intent.getAction();
             Bundle extras = intent.getExtras();
             switch (action) {
-                case NotificationParserComponent.ACTION_RETRIEVE_CURRENT:
-                case NotificationParserComponent.ACTION_POST:
-                    NotificationItem item = notificationParserComponent.extract(intent);
+                case NotificationParser.ACTION_POST:
+                    NotificationItem item = parserComponent.extract(intent);
                     updateList(item);
                     break;
 
-                case NotificationParserComponent.ACTION_LOG:
-                    String message = extras.getString(NotificationParserComponent.EXTRA_REPORT_MESSAGE);
+                case NotificationParser.ACTION_LOG:
+                    String message = extras.getString(NotificationParser.EXTRA_REPORT_MESSAGE);
                     mExecutionText.setText(String.format("%s\n%s", mExecutionText.getText().toString(), message));
                     break;
 
-                case NotificationParserComponent.ACTION_ERROR:
+                case NotificationParser.ACTION_ERROR:
                     progress.setVisibility(View.GONE);
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("Unknown error")
@@ -81,22 +83,29 @@ public class MainActivity extends DaggerAppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // If not using Dagger injection you can still get the component from the static method
-        //notificationParserComponent = NotificationParserModule.provideNotificationParserComponent(new ILoggerImpl());
-
-        // Makes sure the NotificationListener component is still enabled
-        notificationParserComponent.enableComponent(this);
+        parserComponent = NotificationParserProvider.provide();
+        NotificationService.logger = new ILoggerImpl();
 
         // Launches Notification Access device settings
         mLaunchButton = findViewById(R.id.launch_settings);
-        mLaunchButton.setOnClickListener(v -> notificationParserComponent.launchSettings(this));
+        mLaunchButton.setOnClickListener(v -> parserComponent.launchSettings(this));
 
-        // Retrieves and shows the current list of active notifications
+        parserComponent.enableComponentSilent(this);
+
+        // Retrieves and shows the current list of active chattylabs.notifications
         mLoadButton = findViewById(R.id.load_actives);
         mLoadButton.setOnClickListener(v -> {
-            if (notificationParserComponent.isEnabled(this)) {
+            if (parserComponent.isEnabled(this)) {
                 progress.setVisibility(View.VISIBLE);
                 mMessageAdapter.setData(new ArrayList<>());
-                notificationParserComponent.retrieveActiveNotifications(this);
+                mMessageAdapter.notifyDataSetChanged();
+                parserComponent.fetchActiveNotifications(this, data -> {
+                    runOnUiThread(() -> {
+                        for (NotificationData item : data) {
+                            updateList(item);
+                        }
+                    });
+                });
             }
         });
 
@@ -153,10 +162,9 @@ public class MainActivity extends DaggerAppCompatActivity {
     public void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(NotificationParserComponent.ACTION_ERROR);
-        filter.addAction(NotificationParserComponent.ACTION_LOG);
-        filter.addAction(NotificationParserComponent.ACTION_POST);
-        filter.addAction(NotificationParserComponent.ACTION_RETRIEVE_CURRENT);
+        filter.addAction(NotificationParser.ACTION_ERROR);
+        filter.addAction(NotificationParser.ACTION_LOG);
+        filter.addAction(NotificationParser.ACTION_POST);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
     }
 
@@ -167,44 +175,42 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private MessageAdapter.OnItemClickListener listener = item -> {
-        String text = "package: " + item.getPackageName() + "\n\n" +
-                      "time: " + NotificationItem.getDatetime(item.getTimestamp()) + "\n\n";
+        String text = "<b>package:</b> " + item.getPackageName() + "<br/><br/>" +
+                      "<b>time:</b> " + NotificationItem.getDatetime(item.getPostTime()) + "<br/><br/>";
         if (item.getType() == NotificationItem.MESSAGE) {
             NotificationMessage message = (NotificationMessage) item;
-            text += "type: MESSAGE (Already developed, No need to check!)\n\n" +
-                    "sender: " + message.getSender() + "\n\n" +
-                    "message: " + message.getText() + "\n"
+            text += "<b>type:</b> MESSAGE (Already developed, No need to check!)<br/><br/>" +
+                    "<b>sender:</b> " + message.getSender() + "<br/><br/>" +
+                    "<b>message:</b> " + message.getText() + "<br/>"
             ;
         }
         else if (item.getType() == NotificationItem.DATA) {
             NotificationData data = (NotificationData) item;
-            text += "type: DATA\n\n" +
-                    "when: " + NotificationItem.getDatetime(data.when) + "\n\n" +
-                    "category: " + data.category + "\n\n" +
-                    "group: " + data.group + "\n\n" +
-                    "sbnKey: " + data.sbnKey + "\n\n" +
-                    "sbnTag: " + data.sbnTag + "\n\n" +
-                    "settingsText: " + data.settingsText + "\n\n" +
-                    "shortcutId: " + data.shortcutId + "\n\n" +
-                    "sortKey: " + data.sortKey + "\n\n" +
-                    "tickerText: " + data.tickerText + "\n\n" +
-                    "number: " + data.number + "\n\n" +
-                    "sbnId: " + data.sbnId + "\n\n" +
-                    "sbnIsGroup: " + data.sbnIsGroup + "\n\n" +
-                    "---------- EXTRAS --------" + "\n\n" +
-                    data.extras + "\n\n" +
-                    "---------- ACTIONS --------" + "\n\n" +
-                    data.actionsString + "\n"
+            text += "<b>type:</b> DATA<br/>" +
+                    "<b>when:</b> " + NotificationItem.getDatetime(data.when) + "<br/>" +
+                    "<b>category:</b> " + data.category + "<br/>" +
+                    "<b>group:</b> " + data.group + "<br/>" +
+                    "<b>sbnKey:</b> " + data.sbnKey + "<br/>" +
+                    "<b>sbnTag:</b> " + data.sbnTag + "<br/>" +
+                    "<b>settingsText:</b> " + data.settingsText + "<br/>" +
+                    "<b>shortcutId:</b> " + data.shortcutId + "<br/>" +
+                    "<b>sortKey:</b> " + data.sortKey + "<br/>" +
+                    "<b>tickerText:</b> " + data.tickerText + "<br/>" +
+                    "<b>number:</b> " + data.number + "<br/>" +
+                    "<b>sbnId:</b> " + data.sbnId + "<br/>" +
+                    "<b>sbnIsGroup:</b> " + data.sbnIsGroup + "<br/>" +
+                    "<br/>EXTRAS<br/>" + data.extras + "<br/>" +
+                    "<br/>ACTIONS<br/>" + data.actionsString + "<br/>"
             ;
         }
 
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle(item.getPackageName())
-                .setMessage(text).show();
+                .setMessage(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)).show();
     };
 
     private String join(String[] strings) {
-        String space = "\n       - ";
+        String space = "<br/>       - ";
         if (strings != null) {
             return space + TextUtils.join(space, strings);
         }
@@ -222,13 +228,13 @@ public class MainActivity extends DaggerAppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         checkEnabled();
-        if (!notificationParserComponent.isEnabled(this)) {
+        if (!parserComponent.isEnabled(this)) {
             progress.setVisibility(View.GONE);
         }
     }
 
     private void checkEnabled() {
-        if (notificationParserComponent.isEnabled(this)) {
+        if (parserComponent.isEnabled(this)) {
             mLoadButton.setVisibility(View.VISIBLE);
             mLaunchButton.setText(R.string.launch_to_disable);
             mExecutionText.setText(String.format("%s%n%s",
@@ -243,12 +249,16 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private static class Holder extends RecyclerView.ViewHolder {
+        private final ImageView avatar;
+        private final TextView name;
         private final TextView packageName;
         private final TextView time;
         private final TextView ticketText;
 
         Holder(View itemView) {
             super(itemView);
+            avatar = itemView.findViewById(R.id.avatar);
+            name = itemView.findViewById(R.id.name);
             packageName = itemView.findViewById(R.id.packageName);
             time = itemView.findViewById(R.id.time);
             ticketText = itemView.findViewById(R.id.ticketText);
@@ -284,25 +294,33 @@ public class MainActivity extends DaggerAppCompatActivity {
 
             holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
 
-            holder.packageName.setText(item.getPackageName());
-            holder.time.setText(NotificationItem.getDatetime(item.getTimestamp()));
+            holder.time.setText(NotificationItem.getDatetime(item.getPostTime()));
 
             if (item.getType() == NotificationItem.MESSAGE) {
+                holder.packageName.setVisibility(View.VISIBLE);
+                holder.packageName.setText(item.getPackageName());
                 NotificationMessage message = (NotificationMessage) item;
-                holder.ticketText.setText(String.format(
-                        "Type: MESSAGE (Already developed, No need to check!)%n%s: %s",
-                        message.getSender(), message.getText()));
+                holder.name.setText(message.getSender());
+                holder.avatar.setVisibility(View.VISIBLE);
+                holder.avatar.setImageBitmap(message.getAvatar());
+                holder.ticketText.setText(
+                        HtmlCompat.fromHtml(String.format(
+                        "<b>Type:</b> MESSAGE %n%s: %s",
+                        message.getSender(), message.getText()), HtmlCompat.FROM_HTML_MODE_LEGACY));
             }
             else if (item.getType() == NotificationItem.DATA) {
+                holder.avatar.setVisibility(View.GONE);
+                holder.packageName.setVisibility(View.GONE);
+                holder.name.setText(item.getPackageName());
                 NotificationData data = (NotificationData) item;
                 String text = "...perhaps a custom view?";
                 if (!TextUtils.isEmpty(data.titleText) || !TextUtils.isEmpty(data.messageText)) {
-                    text = "titleText - " + data.titleText;
-                    text += "\nmessageText - " + data.messageText;
+                    text = "<b>titleText</b> - " + data.titleText;
+                    text += "<br/><b>messageText</b> - " + data.messageText;
                 } else if (!TextUtils.isEmpty(data.tickerText)) {
-                    text = "tickerText - " + data.tickerText;
+                    text = "<b>tickerText</b> - " + data.tickerText;
                 }
-                holder.ticketText.setText(text);
+                holder.ticketText.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY));
             }
         }
 

@@ -1,34 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.chattylabs.demo.notifications.parser">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="chattylabs.notifications.demo">
 
     <application
-        android:name="com.chattylabs.demo.notifications.parser.DemoApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${HOCKEYAPP_APP_ID}" />
         <meta-data android:name="com.chattylabs.sdk.APP_ID" android:value="${CHATTYLABS_APP_ID}" />
-        <activity android:name="com.chattylabs.demo.notifications.parser.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="com.chattylabs.demo.notifications.parser.NotificationListenerIntentService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.LOG"/>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.ERROR"/>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.POST"/>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.REMOVE"/>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.STATE"/>
-                <action android:name="com.chattylabs.sdk.android.notifications.action.RETRIEVE_CURRENT"/>
-            </intent-filter>
-        </service>
+        <service android:name="client.NotificationService" />
     </application>
 
 </manifest>
