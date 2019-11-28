@@ -1,3 +1,5 @@
 [submodule "android-buildsystem"]
 	path = android-buildsystem
 	url = git@github.com:chattylabs/android-buildsystem.git
+	update = rebase
+	branch = master

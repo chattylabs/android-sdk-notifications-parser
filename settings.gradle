@@ -1,4 +1,2 @@
-include ':app'
-
-include ":parser"
-project(":parser").projectDir = file("../private-android-sdk-notifications-parser/sdk-notifications-parser")
+include ':app', ":android-sdk-notifications-parser-external"
+project(":android-sdk-notifications-parser-external").projectDir = file("../private-android-sdk-notifications-parser/sdk-notifications-parser")
