@@ -1,27 +1,18 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven { url "https://dl.bintray.com/chattylabs/maven" }
-    }
-    dependencies {
-        classpath 'com.chattylabs:versioning:0.19.5'
-        classpath 'com.novoda:bintray-release:0.9'
-    }
-}
-
 apply plugin: 'com.android.application'
 apply from: '../android-buildsystem/android.gradle'
 apply from: '../android-buildsystem/versioning.gradle'
 
 android {
+
+    compileSdkVersion 28
+
     defaultConfig {
+        minSdkVersion 21
         targetSdkVersion 28
         applicationId "chattylabs.notifications.demo"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                HOCKEYAPP_APP_ID: "658862d7f4d34d89b96ae8356aafdb05",
                 CHATTYLABS_APP_ID: "e1c12f0f-4300-4358-874b-bcf74dbadeb9"
         ]
     }
@@ -37,16 +28,16 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Android dependencies
-    implementation "androidx.appcompat:appcompat:1.0.0"
-    implementation "androidx.constraintlayout:constraintlayout:2.0.0-alpha3"
-    implementation "androidx.cardview:cardview:1.0.0"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.cardview:cardview:1.0.0'
     implementation "com.google.android.material:material:1.0.0"
+    implementation 'com.google.android:flexbox:1.0.0'
 
     // SDK
-    implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
-    implementation 'com.chattylabs:android-commons:0.5.2'
-    //implementation 'chattylabs:notifications-parser:0.22.3'
-    implementation project(":parser")
+    implementation "chattylabs.android:commons:$android_commons"
+    //implementation 'chattylabs.android:notifications-parser:0.22.3'
+    implementation project(":android-sdk-notifications-parser-external")
 
     // Test dependencies
     testImplementation 'junit:junit:4.12'

@@ -21,6 +21,9 @@ public class NotificationService extends Service {
         @Override public void post(Intent intent) {
             LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(intent);
         }
+
+        @Override public void notifyServerConnected() {
+        }
     };
 
     @Nullable @Override public IBinder onBind(Intent intent) {
